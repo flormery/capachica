@@ -14,48 +14,50 @@ pipeline {
                 }
             }
         }
-        stage('Build') {
+                stage('Test') {
             steps {
-                timeout(time: 12, unit: 'MINUTES'){
-                    sh "mvn -DskipTests clean package -f SysAlmacen/pom.xml"
+                timeout(time: 15, unit: 'MINUTES') {
+                    // Ejecuta pruebas unitarias y genera cobertura con karma + jasmine
+                    sh 'ng test --watch=false --code-coverage'
                 }
             }
         }
-        stage('Test') {
-            steps {
-                timeout(time: 15, unit: 'MINUTES'){
-                    // Se cambia <test> por <install> para que se genere el reporte de jacoco
-                    sh "mvn clean install -f SysAlmacen/pom.xml"
-                }
-            }
-        }
+
         stage('Sonar') {
             steps {
-                timeout(time: 12, unit: 'MINUTES'){
-                    withSonarQubeEnv('sonarqube'){
-                        sh "mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Pcoverage -f SysAlmacen/pom.xml"
+                timeout(time: 12, unit: 'MINUTES') {
+                    withSonarQubeEnv('sonarqube') {
+                        sh '''
+                        sonar-scanner \
+                          -Dsonar.projectKey=frontend \
+                          -Dsonar.sources=src \
+                          -Dsonar.tests=src \
+                          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                          -Dsonar.test.inclusions=**/*.spec.ts \
+                          -Dsonar.exclusions=**/*.spec.ts,**/node_modules/** \
+                          -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
+                        '''
                     }
                 }
             }
         }
+
         stage('Quality gate') {
             steps {
-
-                sleep(10) //seconds
-
-                timeout(time: 12, unit: 'MINUTES'){
+                sleep(time: 10, unit: 'SECONDS')
+                timeout(time: 12, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
-        stage('Deploy') {
+
+        stage('Deploy (opcional)') {
             steps {
-			    timeout(time: 12, unit: 'MINUTES'){
-					// Ejecutar mvn spring-boot:run
-					echo "mvn spring-boot:run -f SysAlmacen/pom.xml"
-                }			
-                //echo "mvn spring-boot:run -f SysAlmacen/pom.xml"
+                timeout(time: 12, unit: 'MINUTES') {
+                    echo 'Despliegue local solo para desarrollo...'
+                    echo 'ng serve --configuration=production'
+                    // sh 'ng serve --configuration=production' // solo si no necesitas el terminal activo
+                }
             }
-        }
     }
 }
