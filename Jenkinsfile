@@ -54,10 +54,4 @@ pipeline {
             }
         }
     }
-
-    post {
-        success { echo ' ¡Todo verde!' }
-        failure { echo ' Algo falló, échale un ojo.' }
-        always  { echo ' Pipeline finalizado.' }
-    }
 }
