@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     tools {
-        // El “Name” que diste en Jenkins Admin → Tools → NodeJS
+        // El "Name" que diste en Jenkins Admin → Tools → NodeJS
         nodejs 'NodeJS_24'
     }
 
     stages {
         stage('Clone') {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     git branch: 'main',
                         credentialsId: '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', url: 'https://github.com/flormery/capachica.git'
                 }
@@ -48,7 +48,7 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
