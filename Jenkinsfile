@@ -17,29 +17,22 @@ pipeline {
             }
         }
 
-        /* A partir de aquí, entramos en capachica */
         stage('Install dependencies') {
             steps {
-                dir('capachica') {
-                    sh 'npm install'
-                }
+                sh 'npm install'
             }
         }
 
         stage('Build') {
             steps {
-                dir('capachica') {
-                    sh 'npm run build'
-                }
+                sh 'npm run build'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                dir('capachica') {
-                    withSonarQubeEnv('sonarqube') {
-                        sh 'npx sonar-scanner'
-                    }
+                withSonarQubeEnv('sonarqube') {
+                    sh 'npx sonar-scanner'
                 }
             }
         }
