@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     tools {
-        // El "Name" que diste en Jenkins Admin → Tools → NodeJS
         nodejs 'NodeJS_24'
     }
 
@@ -17,22 +16,28 @@ pipeline {
             }
         }
 
-       stage('Install dependencies') {
+        stage('Install dependencies') {
             steps {
-                sh 'npm install'
+                dir('turismo-frontend') {
+                    sh 'npm install'
+                }
             }
         }
 
         stage('Build') {
             steps {
-                sh 'npm run build'
+                dir('turismo-frontend') {
+                    sh 'npm run build'
+                }
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonarqube') {
-                    sh 'npx sonar-scanner'
+                    dir('turismo-frontend') {
+                        sh 'npx sonar-scanner'
+                    }
                 }
             }
         }
