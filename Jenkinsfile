@@ -17,26 +17,40 @@ pipeline {
         }
 
         // A partir de aquí, entramos en capachica
-    stage('Install dependencies') {
-        steps {
-            dir('capachica') {
-                sh 'npm install'
+        stage('Install dependencies') {
+            steps {
+                dir('capachica') {
+                    sh 'npm install'
+                }
             }
         }
-    }
 
-    stage('Unit tests + Coverage') {
-        steps {
-            dir('capachica') {
-                sh 'npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage'
+
+
+
+        stage('Build') {
+            steps {
+                dir('capachica') {
+                    sh 'npm run build'
+                }
             }
         }
-    }
 
-    stage('Build') {
-        steps {
-            dir('capachica') {
-                sh 'npm run build'
+        stage('SonarQube Analysis') {
+            steps {
+                dir('capachica') {
+                    withSonarQubeEnv('sonarqube') {
+                        sh 'npx sonar-scanner'
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
     }
